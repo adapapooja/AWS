@@ -2,14 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 
+	"github.com/adapapooja/repository"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	dynamodb  "github.com/adapapooja/repository"
 )
 
 // Item represents the structure of the DynamoDB item
@@ -19,10 +18,11 @@ type Item struct {
 	FullName  string    `json:"fullname"`
 	gender string `json:"gender"`
 }
-
 // createHandler for creating an item
-func createHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func CreateHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var newItem Item
+
+
 	err := json.Unmarshal([]byte(request.Body), &newItem)
 	if err != nil {
 		log.Printf("Error unmarshalling request body: %v", err)
@@ -40,11 +40,14 @@ func createHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 			"FullName": {
 				S:aws.String(newItem.FullName),
 			},
+			"gender":{
+				S:aws.String(newItem.gender),
+			},
 		},
-		TableName: aws.String(dynamodb.tableName),
+		TableName: aws.String(repository.TableName),
 	}
 
-	_, err = svc.PutItem(input)
+	_, err = repository.Svc.PutItem(input)
 	if err != nil {
 		log.Printf("Error creating item: %v", err)
 		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Error creating item"}, nil
@@ -55,7 +58,9 @@ func createHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 }
 
 // readHandler for reading an item
-func readHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func ReadHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+
 	itemID := request.PathParameters["id"]
 
 	input := &dynamodb.GetItemInput{
@@ -64,10 +69,10 @@ func readHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyR
 				S: aws.String(itemID),
 			},
 		},
-		TableName: aws.String(tableName),
+		TableName: aws.String(repository.TableName),
 	}
 
-	result, err := svc.GetItem(input)
+	result, err := repository.Svc.GetItem(input)
 	if err != nil {
 		log.Printf("Error reading item: %v", err)
 		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Error reading item"}, nil
@@ -89,7 +94,9 @@ func readHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyR
 }
 
 // updateHandler for updating an item
-func updateHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func UpdateHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+
 	itemID := request.PathParameters["id"]
 
 	var updatedItem Item
@@ -102,19 +109,19 @@ func updateHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 	input := &dynamodb.UpdateItemInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":a": {
-				N: aws.String(fmt.Sprintf("%d", updatedItem.Age)),
+				S: aws.String( updatedItem.emailid),
 			},
 		},
-		TableName: aws.String(tableName),
+		TableName: aws.String(repository.TableName),
 		Key: map[string]*dynamodb.AttributeValue{
 			"ID": {
 				S: aws.String(itemID),
 			},
 		},
-		UpdateExpression: aws.String("SET Age = :a"),
+		UpdateExpression: aws.String("SET email id = :a"),
 	}
 
-	_, err = svc.UpdateItem(input)
+	_, err = repository.Svc.UpdateItem(input)
 	if err != nil {
 		log.Printf("Error updating item: %v", err)
 		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Error updating item"}, nil
@@ -125,7 +132,9 @@ func updateHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 }
 
 // deleteHandler for deleting an item
-func deleteHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func DeleteHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+
 	itemID := request.PathParameters["id"]
 
 	input := &dynamodb.DeleteItemInput{
@@ -134,10 +143,10 @@ func deleteHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 				S: aws.String(itemID),
 			},
 		},
-		TableName: aws.String(tableName),
+		TableName: aws.String(repository.TableName),
 	}
 
-	_, err := svc.DeleteItem(input)
+	_, err := repository.Svc.DeleteItem(input)
 	if err != nil {
 		log.Printf("Error deleting item: %v", err)
 		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Error deleting item"}, nil

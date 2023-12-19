@@ -9,15 +9,15 @@ import (
 )
 
 // DynamoDB client
-var svc *dynamodb.DynamoDB
+var Svc *dynamodb.DynamoDB
 
 // DynamoDB table name
-const tableName = "crudoperations"
+const TableName = "crudoperations"
 
 func init() {
 	// Initialize the AWS session
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
+		Region: aws.String("us-east-2"),
 	})
 
 	if err != nil {
@@ -25,5 +25,5 @@ func init() {
 	}
 
 	// Create DynamoDB client
-	svc = dynamodb.New(sess)
+	Svc = dynamodb.New(sess)
 }

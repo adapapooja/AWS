@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 
+	"github.com/adapapooja/handlers"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -14,13 +15,14 @@ func main() {
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch request.HTTPMethod {
 	case "POST":
-		return createHandler(request)
+		// return CreateHandler(request)
+		return handlers.CreateHandler(request)
 	case "GET":
-		return readHandler(request)
+		return handlers.ReadHandler(request)
 	case "PUT":
-		return updateHandler(request)
+		return handlers.UpdateHandler(request)
 	case "DELETE":
-		return deleteHandler(request)
+		return handlers.DeleteHandler(request)
 	default:
 		return events.APIGatewayProxyResponse{StatusCode: 400, Body: "Invalid HTTP method"}, nil
 	}
